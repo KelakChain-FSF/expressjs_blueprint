@@ -1,1 +1,1 @@
- # Peer To Peer Message Service
+ # Channel Launcher
