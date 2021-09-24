@@ -6,7 +6,7 @@
 - npm run build
 - npm run start-server
 - npm run test
-
+- docker-compuse up
 # Convintions
 
 ## Name
