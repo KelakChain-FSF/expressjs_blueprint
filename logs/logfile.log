@@ -1690,3 +1690,15 @@
 2021-09-24T08:10:34.085Z - [32minfo[39m: Cargo Api run URL: http://127.0.0.1:3000
 2021-09-24T08:10:34.098Z - [32minfo[39m: Cargo Api run Port: 3000
 2021-09-24T08:10:34.104Z - [32minfo[39m: Cargo Api run URL: http://127.0.0.1:3000
+2021-09-24T08:28:23.661Z - [32minfo[39m: Worker 43 is online
+2021-09-24T08:28:23.719Z - [32minfo[39m: Worker 41 is online
+2021-09-24T08:28:35.986Z - [32minfo[39m: Cargo Api run Port: 3000
+2021-09-24T08:28:36.013Z - [32minfo[39m: Cargo Api run URL: http://127.0.0.1:3000
+2021-09-24T08:28:36.203Z - [32minfo[39m: Cargo Api run Port: 3000
+2021-09-24T08:28:36.215Z - [32minfo[39m: Cargo Api run URL: http://127.0.0.1:3000
+2021-09-24T08:30:12.454Z - [32minfo[39m: Worker 81 is online
+2021-09-24T08:30:12.494Z - [32minfo[39m: Worker 79 is online
+2021-09-24T08:30:29.618Z - [32minfo[39m: Cargo Api run Port: 3000
+2021-09-24T08:30:29.650Z - [32minfo[39m: Cargo Api run URL: http://127.0.0.1:3000
+2021-09-24T08:30:29.939Z - [32minfo[39m: Cargo Api run Port: 3000
+2021-09-24T08:30:29.963Z - [32minfo[39m: Cargo Api run URL: http://127.0.0.1:3000

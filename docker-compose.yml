@@ -1,0 +1,32 @@
+version: "3"
+services:
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+  app:
+    container_name: node_base
+    restart: always
+    build:
+      context: .
+      args:
+        NODE_ENV: development
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    links:
+      - redis
+      - mongo
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - ./.env
+    environment:
+      REDIS_HOST: redis
