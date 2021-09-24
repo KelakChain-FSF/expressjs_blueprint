@@ -5,6 +5,7 @@ export const HomePage = async (req: Request, res: Response) => {
     name: "Majid Ahmaditabar",
     linkedin: "https://www.linkedin.com/in/majahd/",
   };
+
   ApiRes(res, <RestApi.ResInterface>{
     status: 200,
     msg: undefined,

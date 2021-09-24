@@ -1,3 +1,4 @@
+import { Response } from "express";
 const status_message: any = {
   200: "Request Found!",
   201: "Request Found And Content Ready!",
@@ -13,13 +14,10 @@ const status_message: any = {
   500: "Internal Server Error!",
 };
 
-export const ApiRes = (res: Express.Response, result: RestApi.ResInterface) => {
-  res.json({
+export const ApiRes = (res: Response, result: RestApi.ResInterface) => {
+  res.status(result.status).json({
     status: result.status,
-    msg:
-      result.msg ||
-      status_message[result.status] ||
-      `Status ${result.status} Happened!`,
+    msg: result.msg || status_message[result.status] || `Status ${result.status} Happened!`,
     data: result.data,
   });
 };
