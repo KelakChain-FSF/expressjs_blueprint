@@ -2,7 +2,6 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { Express } from 'express';
 
-
 const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
@@ -23,5 +22,3 @@ export function setupSwagger(app: Express) {
 }
 
 export default swaggerSpec;
-
-
