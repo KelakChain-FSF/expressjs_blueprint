@@ -5,7 +5,7 @@ const HomeRoutes = express.Router();
 /**
  * @swagger
  * tags:
- *   - name: Welcome Page
+ *   - name: Welcome
  *     description: Welcome To Expressjs App
  */
 
@@ -13,6 +13,7 @@ const HomeRoutes = express.Router();
  * @swagger
  * /:
  *   get:
+ *     tags: [Welcome]
  *     summary: Welcome Message
  *     description: Return Welcome Message.
  *     responses:

@@ -9,6 +9,7 @@ import { pinoHttp } from 'pino-http';
 import logger from './config/logger.js';
 import { setupSwagger } from './config/swagger.js';
 import HomeRoutes from './home/home.routes.js';
+import TodoRoutes from './todo/todo.routes.js';
 
 dotenv.config();
 
@@ -25,8 +26,11 @@ app.use(
 
 setupSwagger(app);
 
-app.use('/', [HomeRoutes]);
-// app.use("/api/", [userRoutes]);
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+app.use('/api', [HomeRoutes, TodoRoutes]);
 
 const server = http.createServer(app);
 const OPTIONS: ListenOptions = {
