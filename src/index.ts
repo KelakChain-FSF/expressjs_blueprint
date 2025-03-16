@@ -1,25 +1,45 @@
 import express from 'express';
 import cors from 'cors';
+import http from 'http';
+import os from 'node:os';
+import dns from 'node:dns';
+import { ListenOptions } from 'node:net';
 import dotenv from 'dotenv';
 import { pinoHttp } from 'pino-http';
 import logger from './config/logger.js';
 import { setupSwagger } from './config/swagger.js';
+import HomeRoutes from './home/home.routes.js';
 
 dotenv.config();
 
 const app = express();
-app.use(pinoHttp({ logger }));
+app.use(express.json());
+app.use(cors());
+
+app.use(
+  pinoHttp({
+    logger,
+    customSuccessMessage: (req, res) => `HTTP ${req.method} ${req.url} -> ${res.statusCode}`,
+  })
+);
+
 setupSwagger(app);
 
-const PORT = process.env.PORT || 3000;
+app.use('/', [HomeRoutes]);
+// app.use("/api/", [userRoutes]);
 
-app.use(cors());
-app.use(express.json());
+const server = http.createServer(app);
+const OPTIONS: ListenOptions = {
+  port: parseInt(process.env.PORT || '3000'),
+};
 
-app.get('/', (req, res) => {
-  res.send('Hello, world!');
+server.listen(OPTIONS, () => {
+  logger.info(`> Local Api Server :  http://localhost:${OPTIONS.port}`);
+  dns.lookup(os.hostname(), { family: 4 }, (err, addr) => {
+    if (!err) {
+      logger.info(`> Network Api Server :  http://${addr}:${OPTIONS.port}`);
+    }
+  });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+export default server;
