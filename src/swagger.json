@@ -7,8 +7,12 @@
   },
   "servers": [
     {
-      "url": "/api",
-      "description": "Main API"
+      "url": "/",
+      "description": "Application Health"
+    },
+    {
+      "url": "/api/v1",
+      "description": "API V1"
     },
     {
       "url": "/api/v2",
@@ -18,7 +22,9 @@
   "paths": {
     "/": {
       "get": {
-        "tags": ["Welcome"],
+        "tags": [
+          "Health"
+        ],
         "summary": "Welcome Message",
         "description": "Return Welcome Message.",
         "responses": {
@@ -41,9 +47,38 @@
         }
       }
     },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Application Health",
+        "description": "Return Applicaion health status.",
+        "responses": {
+          "200": {
+            "description": "The requested todo item.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/todos": {
       "get": {
-        "tags": ["Todos"],
+        "tags": [
+          "Todos"
+        ],
         "summary": "Get all todos",
         "parameters": [
           {
@@ -70,7 +105,9 @@
         }
       },
       "post": {
-        "tags": ["Todos"],
+        "tags": [
+          "Todos"
+        ],
         "summary": "Create a new todo",
         "requestBody": {
           "required": true,
@@ -97,7 +134,9 @@
     },
     "/todos/{id}": {
       "get": {
-        "tags": ["Todos"],
+        "tags": [
+          "Todos"
+        ],
         "summary": "Get a specific todo",
         "parameters": [
           {
@@ -117,7 +156,9 @@
         }
       },
       "patch": {
-        "tags": ["Todos"],
+        "tags": [
+          "Todos"
+        ],
         "summary": "Update a todo",
         "parameters": [
           {
@@ -157,7 +198,9 @@
         }
       },
       "delete": {
-        "tags": ["Todos"],
+        "tags": [
+          "Todos"
+        ],
         "summary": "Delete a todo",
         "parameters": [
           {
@@ -181,7 +224,7 @@
   "components": {},
   "tags": [
     {
-      "name": "Welcome",
+      "name": "Health",
       "description": "Welcome To Expressjs App"
     },
     {

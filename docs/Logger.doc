@@ -1,0 +1,457 @@
+# `BackendLogger` Class
+
+## Overview
+
+A production-ready Node.js logger for backend services extending `BasePinoLogger` with:
+
+- HTTP request/response serialization
+- Express middleware integration
+- Structured JSON logging
+- Development/production mode switching
+
+```typescript
+import { BackendLogger } from '@core/logger';
+import { Request, Response } from 'express';
+```
+
+## Constructor
+
+### `new BackendLogger(options?: LoggerOptions)`
+
+Creates a logger instance with HTTP serialization capabilities.
+
+**Parameters:**
+| Name | Type | Default | Description |
+|------------|-----------------|---------|--------------------------------------|
+| `options` | `LoggerOptions` | `{}` | Pino configuration options |
+
+**Example:**
+
+```typescript
+const logger = new BackendLogger({
+  level: 'debug',
+  redact: ['headers.authorization'],
+});
+```
+
+## HTTP Serializers
+
+### `serializeRequest(req: Request): RequestLogObject`
+
+Static method that safely serializes Express requests.
+
+**Output Format:**
+
+```typescript
+interface RequestLogObject {
+  method: string;
+  url: string;
+  headers: {
+    'user-agent'?: string;
+    referer?: string;
+    host?: string;
+  };
+  remoteAddress: string;
+}
+```
+
+### `serializeResponse(res: Response): ResponseLogObject`
+
+Static method that safely serializes Express responses.
+
+**Output Format:**
+
+```typescript
+interface ResponseLogObject {
+  statusCode: number;
+  headers: {
+    'content-type'?: string;
+    'content-length'?: string;
+  };
+}
+```
+
+## Logging Methods
+
+Inherits all methods from `BasePinoLogger` with HTTP enhancements:
+
+| Method     | Level | Typical Use Case                   |
+| ---------- | ----- | ---------------------------------- |
+| `.error()` | 50    | Server errors (500s)               |
+| `.warn()`  | 40    | Deprecations, slow queries         |
+| `.info()`  | 30    | Route transitions, business events |
+| `.debug()` | 20    | Full request/response bodies       |
+| `.time()`  | -     | Database query timing              |
+
+## Express Middleware Integration
+
+### Recommended Middleware Pattern
+
+```typescript
+import { Request, Response, NextFunction } from 'express';
+
+export function loggingMiddleware(logger: BackendLogger) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const start = Date.now();
+
+    res.on('finish', () => {
+      logger.info('Request completed', {
+        http: {
+          method: req.method,
+          path: req.path,
+          status: res.statusCode,
+          duration: Date.now() - start,
+        },
+        user: req.user?.id,
+      });
+    });
+
+    next();
+  };
+}
+```
+
+## Environment Configuration
+
+### Development Mode (pretty logs)
+
+```typescript
+new BackendLogger({
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+      translateTime: 'HH:MM:ss Z',
+    },
+  },
+});
+```
+
+### Production Mode (JSON logs)
+
+```typescript
+new BackendLogger({
+  level: 'info',
+});
+```
+
+## Complete Usage Example
+
+### 1. Logger Setup
+
+```typescript
+// logger.ts
+import { BackendLogger } from './backend-logger';
+
+export const logger = new BackendLogger({
+  level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+  serializers: {
+    err: pino.stdSerializers.err,
+    req: BackendLogger.serializeRequest,
+    res: BackendLogger.serializeResponse,
+  },
+});
+```
+
+### 2. Express Integration
+
+```typescript
+// app.ts
+import express from 'express';
+import { logger } from './logger';
+
+const app = express();
+
+// Request logging
+app.use((req, res, next) => {
+  logger.debug('Incoming request', {
+    http: BackendLogger.serializeRequest(req),
+  });
+  next();
+});
+
+// Error handling
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  logger.error('Request failed', {
+    error: err,
+    http: {
+      method: req.method,
+      path: req.path,
+    },
+  });
+  next(err);
+});
+```
+
+## Best Practices
+
+1. **Security**
+
+   ```typescript
+   // Always redact sensitive headers
+   new BackendLogger({
+     redact: ['headers.authorization', 'headers.cookie'],
+   });
+   ```
+
+2. **Performance**
+
+   - Use `debug` level sparingly in production
+   - Sample verbose logs:
+     ```typescript
+     if (Math.random() < 0.01) {
+       logger.debug('Full request', { body: req.body });
+     }
+     ```
+
+3. **Structuring Logs**
+   ```typescript
+   logger.info('User action', {
+     user: req.user.id,
+     action: 'profile_update',
+     metadata: {
+       changed_fields: ['email'],
+     },
+   });
+   ```
+
+## Log Analysis
+
+Sample Kibana/CloudWatch queries:
+
+1. **Slow Requests:**
+
+   ```
+   http.duration > 1000 | sort by http.duration desc
+   ```
+
+2. **Error Rate:**
+
+   ```
+   level:error | stats count() by http.status
+   ```
+
+3. **Endpoint Performance:**
+   ```
+   stats avg(http.duration) by http.path, http.method
+   ```
+
+**See Also:**  
+[Express Best Practices](https://expressjs.com/en/advanced/best-practice-performance.html)
+
+# `LambdaLogger` Class
+
+## Overview
+
+A specialized AWS Lambda logger extending `BasePinoLogger` that provides:
+
+- Structured JSON logging
+- AWS context auto-injection
+- Cold start detection
+- CloudWatch-optimized output
+
+```typescript
+import { LambdaLogger } from '@core/shared';
+import { Context } from 'aws-lambda';
+```
+
+## Constructor
+
+### `new LambdaLogger(context: Context, options?: LoggerOptions)`
+
+Creates a new logger instance with Lambda context.
+
+**Parameters:**
+| Name | Type | Description |
+|-----------|---------------|--------------------------------------|
+| `context` | `Context` | AWS Lambda execution context |
+| `options` | `LoggerOptions`| Optional Pino configuration (default: `{}`) |
+
+**Example:**
+
+```typescript
+const logger = new LambdaLogger(context, {
+  level: 'debug',
+  redact: ['password', 'authorization'],
+});
+```
+
+## Properties
+
+### `context: Record<string, unknown>`
+
+Contains merged context including:
+
+- AWS Lambda context (`aws.request_id`, `aws.function_name`, etc.)
+- Cold start flag (`cold_start`)
+- Any custom context set via `setContext()`
+
+## Methods
+
+### `flush(): Promise<void>`
+
+Ensures all buffered logs are written before Lambda termination. **Always call this in your `finally` block.**
+
+**Example:**
+
+```typescript
+try {
+  // ... handler logic ...
+} finally {
+  await logger.flush(); // Critical for Lambda environments
+}
+```
+
+### `setContext(context: Record<string, unknown>): void`
+
+Merges additional context with existing logger context.
+
+**Parameters:**
+| Name | Type | Description |
+|------------|---------------|--------------------------|
+| `context` | `Record<string, unknown>` | Key-value pairs to add |
+
+**Example:**
+
+```typescript
+logger.setContext({
+  user_id: event.userId,
+  correlation_id: event.headers['x-correlation-id'],
+});
+```
+
+## Logging Methods
+
+Inherited from `BasePinoLogger` with AWS enhancements:
+
+| Method     | Level | Recommended Use Case               |
+| ---------- | ----- | ---------------------------------- |
+| `.error()` | 50    | Critical failures                  |
+| `.warn()`  | 40    | Unexpected but handled conditions  |
+| `.info()`  | 30    | Business-relevant events (default) |
+| `.debug()` | 20    | Troubleshooting data               |
+| `.time()`  | -     | Performance measurement            |
+
+**Standard Pattern:**
+
+```typescript
+logger.[level](message: string, meta?: Record<string, unknown>)
+```
+
+## Cold Start Detection
+
+Automatically detects and tags cold starts:
+
+```json
+{
+  "context": {
+    "cold_start": true,
+    "aws": {
+      "function_name": "my-function"
+      // ... other AWS context
+    }
+  }
+}
+```
+
+## CloudWatch Integration
+
+### Recommended IAM Permissions:
+
+```yaml
+iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - logs:CreateLogGroup
+      - logs:CreateLogStream
+      - logs:PutLogEvents
+    Resource: '*'
+```
+
+### Sample Insights Queries:
+
+1. **Find cold starts:**
+
+   ```sql
+   filter context.cold_start = true
+   | stats count() by context.aws.function_name
+   ```
+
+2. **Error analysis:**
+   ```sql
+   filter level = "error"
+   | sort @timestamp desc
+   | limit 20
+   ```
+
+## Full Usage Example
+
+```typescript
+import { LambdaLogger } from '@your-package/logger';
+import { Context } from 'aws-lambda';
+
+export const handler = async (event: any, context: Context) => {
+  const logger = new LambdaLogger(context, {
+    level: process.env.LOG_LEVEL || 'info',
+  });
+
+  try {
+    logger.info('Processing event', {
+      event_type: event.type,
+      user_id: event.user?.id,
+    });
+
+    // Business logic
+    const result = await processEvent(event);
+
+    logger.debug('Intermediate result', { result });
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(result),
+    };
+  } catch (error) {
+    logger.error('Handler failed', {
+      error: error.message,
+      stack: error.stack,
+      event: sanitizeEvent(event),
+    });
+    throw error;
+  } finally {
+    await logger.flush();
+  }
+};
+
+function sanitizeEvent(event: any) {
+  const sanitized = { ...event };
+  delete sanitized.password;
+  return sanitized;
+}
+```
+
+## Best Practices
+
+1. **Always:**
+
+   - Call `flush()` in `finally`
+   - Sanitize sensitive data before logging
+   - Use structured metadata (not string concatenation)
+
+2. **Avoid:**
+
+   - Logging entire event objects
+   - Debug logging in production
+   - Complex objects in metadata (keep them serializable)
+
+3. **Performance:**
+   - Set `LOG_LEVEL=info` in production
+   - Sample debug logs if needed:
+     ```typescript
+     if (Math.random() < 0.1) {
+       logger.debug('Sample debug', { data });
+     }
+     ```
+
+**See Also:**  
+[BasePinoLogger Documentation](#)  
+[AWS Lambda Best Practices](https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html)

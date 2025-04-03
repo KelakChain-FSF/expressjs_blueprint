@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "build": "tsc && cpx 'src/swagger.json' dist",
-    "dev": "nodemon --watch prisma --exec 'yarn prisma:generate && yarn start'",
+    "dev": "nodemon -watch src ./src/index.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init && prisma generate",
     "prisma:studio": "prisma studio",
@@ -23,6 +23,7 @@
   "dependencies": {
     "@prisma/client": "^6.5.0",
     "apollo-server-express": "^3.13.0",
+    "aws-lambda": "^1.0.7",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cors": "^2.8.5",
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@types/aws-lambda": "^8.10.148",
     "@types/copyfiles": "^2",
     "@types/cors": "^2.8.17",
     "@types/cpx": "^1",

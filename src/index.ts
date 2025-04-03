@@ -6,7 +6,7 @@ import dns from 'node:dns';
 import { ListenOptions } from 'node:net';
 import dotenv from 'dotenv';
 import { pinoHttp } from 'pino-http';
-import logger from './config/logger.js';
+import logger, { PinoLogger } from './config/logger.js';
 import { setupSwagger } from './config/swagger.js';
 import HomeRoutes from './home/home.routes.js';
 import TodoRoutes from './todo/todo.routes.js';
@@ -19,18 +19,13 @@ app.use(cors());
 
 app.use(
   pinoHttp({
-    logger,
+    logger: PinoLogger,
     customSuccessMessage: (req, res) => `HTTP ${req.method} ${req.url} -> ${res.statusCode}`,
   })
 );
-
 setupSwagger(app);
-
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
-
-app.use('/api', [HomeRoutes, TodoRoutes]);
+app.use('/', [HomeRoutes]);
+app.use('/api/v1', [TodoRoutes]);
 
 const server = http.createServer(app);
 const OPTIONS: ListenOptions = {
