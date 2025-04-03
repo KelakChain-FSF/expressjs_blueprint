@@ -1,3 +1,4 @@
+import { Request, Response } from 'express';
 import { pino, Logger, LoggerOptions } from 'pino';
 import { Context } from 'aws-lambda';
 
@@ -81,7 +82,7 @@ abstract class BasePinoLogger {
   get pinoInstance() {
     return this.logger;
   }
-  
+
   private getLogObject(meta?: Record<string, unknown>) {
     return {
       context: this.sanitizeContext({
@@ -112,8 +113,8 @@ class BackendLogger extends BasePinoLogger {
     const serializers = {
       err: pino.stdSerializers.err,
       error: pino.stdSerializers.err,
-      req: (req: any) => BackendLogger.serializeRequest(req),
-      res: (res: any) => BackendLogger.serializeResponse(res),
+      req: (req: Request) => BackendLogger.serializeRequest(req),
+      res: (res: Response) => BackendLogger.serializeResponse(res),
     };
 
     super({
@@ -122,7 +123,7 @@ class BackendLogger extends BasePinoLogger {
     });
   }
 
-  private static serializeRequest(req: any) {
+  private static serializeRequest(req: Request) {
     return {
       method: req.method,
       url: req.url,
@@ -135,12 +136,13 @@ class BackendLogger extends BasePinoLogger {
     };
   }
 
-  private static serializeResponse(res: any) {
+  private static serializeResponse(res: Response) {
+    const headers = res.getHeaders();
     return {
       statusCode: res.statusCode,
       headers: {
-        'content-type': res.headers['content-type'],
-        'content-length': res.headers['content-length'],
+        'content-type': headers['content-type'],
+        'content-length': headers['content-length'],
       },
     };
   }
