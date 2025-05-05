@@ -1,4 +1,5 @@
-import prisma from '../../config/prisma.js';
+import prismaClient from '../../config/prisma.js';
+import getPaginationInfo from '../../utils/pagination.js';
 
 export class TodoData {
   page: number;
@@ -11,13 +12,19 @@ export class TodoData {
 
   async allTodo() {
     const skip = (this.page - 1) * this.limit;
-    return prisma.todos.findMany({
-      skip,
-      take: this.limit,
-    });
+    const totalItems = await prismaClient.todos.count();
+    const pagination = getPaginationInfo(totalItems, this.page, this.limit);
+
+    return {
+      data: await prismaClient.todos.findMany({
+        skip,
+        take: this.limit,
+      }),
+      page: pagination,
+    };
   }
   async getTodo(id: number) {
-    return prisma.todos.findUnique({ where: { id } });
+    return prismaClient.todos.findUnique({ where: { id } });
   }
 }
 
@@ -27,18 +34,18 @@ export class TodoUtils extends TodoData {
   }
 
   async newTodo(title: string) {
-    return prisma.todos.create({
+    return prismaClient.todos.create({
       data: { title },
     });
   }
   async updateTodo(id: number, title?: string, completed?: boolean) {
-    return prisma.todos.update({
+    return prismaClient.todos.update({
       where: { id },
       data: { ...(title && { title }), ...(completed !== undefined && { completed }) },
     });
   }
 
   async deleteTodo(id: number) {
-    return prisma.todos.delete({ where: { id } });
+    return prismaClient.todos.delete({ where: { id } });
   }
 }
