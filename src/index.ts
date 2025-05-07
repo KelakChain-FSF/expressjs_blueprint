@@ -3,7 +3,7 @@ import cors from 'cors';
 import http from 'http';
 import os from 'node:os';
 import dns from 'node:dns';
-import { ListenOptions } from 'node:net';
+import type { ListenOptions } from 'node:net';
 import dotenv from 'dotenv';
 import { pinoHttp } from 'pino-http';
 import logger, { PinoLogger } from './config/logger.js';
