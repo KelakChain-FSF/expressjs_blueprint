@@ -1,10 +1,11 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint" , "@vitest"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:@vitest/legacy-recommended",
     "prettier" // Add this if you're using Prettier
   ],
   "rules": {
@@ -16,6 +17,9 @@
   },
   "env": {
     "node": true,
-    "es2020": true
+    "es2022": true
+  },
+  "globals": {
+    "vi": true
   }
 }

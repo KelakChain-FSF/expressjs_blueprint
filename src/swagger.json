@@ -22,9 +22,7 @@
   "paths": {
     "/": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "summary": "Welcome Message",
         "description": "Return Welcome Message.",
         "responses": {
@@ -49,9 +47,7 @@
     },
     "/health": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "summary": "Application Health",
         "description": "Return Applicaion health status.",
         "responses": {
@@ -76,9 +72,7 @@
     },
     "/todos": {
       "get": {
-        "tags": [
-          "Todos"
-        ],
+        "tags": ["Todos"],
         "summary": "Get all todos",
         "parameters": [
           {
@@ -105,9 +99,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Todos"
-        ],
+        "tags": ["Todos"],
         "summary": "Create a new todo",
         "requestBody": {
           "required": true,
@@ -134,9 +126,7 @@
     },
     "/todos/{id}": {
       "get": {
-        "tags": [
-          "Todos"
-        ],
+        "tags": ["Todos"],
         "summary": "Get a specific todo",
         "parameters": [
           {
@@ -156,9 +146,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "Todos"
-        ],
+        "tags": ["Todos"],
         "summary": "Update a todo",
         "parameters": [
           {
@@ -198,9 +186,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Todos"
-        ],
+        "tags": ["Todos"],
         "summary": "Delete a todo",
         "parameters": [
           {
