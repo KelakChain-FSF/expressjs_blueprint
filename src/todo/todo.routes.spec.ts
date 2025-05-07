@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../index';
-import { describe, it, expect, vi, Mock, afterEach, beforeAll } from 'vitest';
+import { describe, it, expect, vi, Mock, afterEach } from 'vitest';
 import * as TodoController from './todo.controller';
 
 const V1Route = '/api/v1/todos';
